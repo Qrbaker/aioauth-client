@@ -284,7 +284,7 @@ class OAuth2Client(Client):
     name = 'oauth2'
     shared_key = 'code'
 
-    def __init__(self, client_id: str, client_secret: str, base_url: str = None,
+    def __init__(self, client_id: str, client_secret: str, redirect_uri:str = None, base_url: str = None,
                  authorize_url: str = None, access_token: str = None, access_token_url: str = None,
                  access_token_key: str = None, transport: httpx.AsyncClient = None,
                  logger: logging.Logger = None, **params):
@@ -295,12 +295,16 @@ class OAuth2Client(Client):
         self.access_token = access_token
         self.client_id = client_id
         self.client_secret = client_secret
+        if redirect_uri:
+            self.redirect_uri = redirect_uri
         self.params = params
 
     def get_authorize_url(self, **params) -> str:
         """Return formatted authorize URL."""
         params = dict(self.params, **params)
         params.update({'client_id': self.client_id, 'response_type': 'code'})
+        if self.redirect_uri:
+            params.update({'redirect_uri': self.redirect_uri})
         return f"{ self.authorize_url }?{ urlencode(params) }"
 
     def request(self, method: str, url: str, params: t.Dict = None, headers: t.Dict = None,
